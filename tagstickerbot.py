@@ -91,7 +91,8 @@ def tag_sticker(bot, update, user_data):  # pylint: disable=unused-argument
     """Handler for a text message with the user tags.
        Store tags in the user data.
     """
-    user_data['tags'] = update.message.text
+    # Hashtags are not supported
+    user_data['tags'] = update.message.text.replace("#", "")
     update.message.reply_text("You wanna tag your sticker with the following words:\n"
                               "<b>{}</b>\n".format(user_data["tags"]) + "Is that right?",
                               parse_mode="HTML",
