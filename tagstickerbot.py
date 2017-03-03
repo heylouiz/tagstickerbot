@@ -120,6 +120,8 @@ def confirm_tag(bot, update, user_data):  # pylint: disable=unused-argument
         if user_data["modify"]:
             for tag in user_data['tags'].split(","):
                 tag = tag.strip()
+                if tag == "":
+                    continue
                 # Insert tag if not exist
                 cursor.execute("INSERT INTO TAG(tag) SELECT ?"
                                " WHERE NOT EXISTS(SELECT tag FROM TAG WHERE tag=?)",
@@ -160,6 +162,8 @@ def confirm_tag(bot, update, user_data):  # pylint: disable=unused-argument
 
             for tag in user_data['tags'].split(","):
                 tag = tag.strip()
+                if tag == "":
+                    continue
                 # Insert tag if not exist
                 cursor.execute("INSERT INTO TAG(tag) SELECT ?"
                                " WHERE NOT EXISTS(SELECT tag FROM TAG WHERE tag=?)",
