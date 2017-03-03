@@ -11,7 +11,8 @@ import logging
 import sqlite3
 from uuid import uuid4
 
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineQueryResultCachedSticker
+from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineQueryResultCachedSticker,
+                      InlineKeyboardMarkup, InlineKeyboardButton)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, RegexHandler,
                           ConversationHandler, InlineQueryHandler)
 from telegram.ext.dispatcher import run_async
@@ -70,7 +71,10 @@ def get_sticker(bot, update, user_data):  # pylint: disable=unused-argument
         user_data["modify_id"] = None
         update.message.reply_text("Cool, now send me words to tag your sticker.\n"
                                   "You can use more tags, just send them separated by commas (,)\n"
-                                  "Example: dank, meme")
+                                  "<b>Warning:</b> Hashtags (#) are not allowed and will be"
+                                  "removed! Eg: #dank will be stored as dank\n"
+                                  "<b>Example of tags:</b> dank, meme",
+                                  parse_mode="HTML")
         return TAGGING
 
 
@@ -79,7 +83,11 @@ def confirm_update(bot, update, user_data):
        Confirm what the user want to do when an already tagged sticker was sent.
     """
     if update.message.text == "Edit":
-        update.message.reply_text("Cool, send me the new tags to your sticker",
+        update.message.reply_text("Cool, send me the new tags to your sticker\n"
+                                  "<b>Warning:</b> Hashtags (#) are not allowed and will be"
+                                  "removed! Eg: #dank will be stored as dank\n"
+                                  "<b>Example of tags:</b> dank, meme",
+                                  parse_mode="HTML",
                                   reply_markup=ReplyKeyboardRemove())
         return TAGGING
     elif update.message.text == "Cancel":
@@ -184,6 +192,11 @@ def confirm_tag(bot, update, user_data):  # pylint: disable=unused-argument
 
             update.message.reply_text("Yay! Sticker tagged successfully!",
                                       reply_markup=ReplyKeyboardRemove())
+
+            update.message.reply_text("Click here to select a chat to send a tagged sticker.",
+                                      reply_markup=InlineKeyboardMarkup([[
+                                          InlineKeyboardButton(text="Go ➡️",
+                                                               switch_inline_query="")]]))
     elif update.message.text == "No":
         return cancel(bot, update, user_data)
     else:
@@ -240,7 +253,9 @@ def inlinequery(bot, update):  # pylint: disable=unused-argument
         inline_results.append(InlineQueryResultCachedSticker(uuid4(),
                                                              sticker_file_id=sticker["file_id"]))
 
-    update.inline_query.answer(inline_results, cache_time=0, is_personal=True)
+    update.inline_query.answer(inline_results, cache_time=0,
+                               is_personal=True, switch_pm_text="Tag a sticker",
+                               switch_pm_parameter="inline")
 
 def main():
     """The main function
