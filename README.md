@@ -1,11 +1,14 @@
 # @tagstickerbot
 
-A Telegram bot written in Python that tags stickers to help you find them when you "need"
+A Telegram bot written in Python that tags stickers to help you find them when you "need".
 
 Have you ever have trouble to find that dank sticker and loose the timing struging in to pages of stickers?
+
 Your problems are about to disapear, just use the @tagstickerbot to tag and find them!
 
 Check it out: www.telegram.me/tagstickerbot
+
+# Usage
 
 Follow the step to tag the sticker and use it in any chat after that!
 Lets say you tagged the sticker with the word "meme"
@@ -15,6 +18,7 @@ Try to use it by typing the command bellow and select the sticker:
 ```
 If you don't type anything the bot will show all your tagged stickers.
 
+# Start coding
 
 Dependencies (Tested only in Python3):
 

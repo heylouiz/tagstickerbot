@@ -68,7 +68,9 @@ def get_sticker(bot, update, user_data):  # pylint: disable=unused-argument
     else:
         user_data["modify"] = False
         user_data["modify_id"] = None
-        update.message.reply_text("Cool, now send me words or emojis to tag your sticker")
+        update.message.reply_text("Cool, now send me words to tag your sticker.\n"
+                                  "You can use more tags, just send them separated by commas (,)\n"
+                                  "Example: dank, meme")
         return TAGGING
 
 
@@ -77,7 +79,7 @@ def confirm_update(bot, update, user_data):
        Confirm what the user want to do when an already tagged sticker was sent.
     """
     if update.message.text == "Edit":
-        update.message.reply_text("Cool, send me the new tags (words or emojis) to your sticker",
+        update.message.reply_text("Cool, send me the new tags to your sticker",
                                   reply_markup=ReplyKeyboardRemove())
         return TAGGING
     elif update.message.text == "Cancel":
@@ -91,7 +93,8 @@ def tag_sticker(bot, update, user_data):  # pylint: disable=unused-argument
     """
     user_data['tags'] = update.message.text
     update.message.reply_text("You wanna tag your sticker with the following words:\n"
-                              "{}\n".format(user_data["tags"]) + "Is that right?",
+                              "<b>{}</b>\n".format(user_data["tags"]) + "Is that right?",
+                              parse_mode="HTML",
                               reply_markup=ReplyKeyboardMarkup([["Yes", "No"]],
                                                                one_time_keyboard=True))
     return CONFIRM_TAG
