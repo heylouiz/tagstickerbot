@@ -118,6 +118,10 @@ def confirm_tag(bot, update, user_data):  # pylint: disable=unused-argument
     if update.message.text == "Yes":
         cursor = conn.cursor()
         if user_data["modify"]:
+            # Delete the previous defined tags
+            cursor.execute("DELETE FROM STICKER_TAG WHERE user_sticker_rowid=?",
+                           (user_data["modify_id"],))
+            # Insert the new ones
             for tag in user_data['tags'].split(","):
                 tag = tag.strip()
                 if tag == "":
@@ -130,9 +134,9 @@ def confirm_tag(bot, update, user_data):  # pylint: disable=unused-argument
                 cursor.execute("SELECT rowid, tag FROM TAG WHERE tag=?", (tag,))
                 tag_rowid = cursor.fetchone()["rowid"]
 
-                cursor.execute("UPDATE STICKER_TAG SET tag_rowid=? WHERE user_sticker_rowid=?",
-                               (tag_rowid,
-                                user_data["modify_id"]))
+                cursor.execute("INSERT INTO STICKER_TAG VALUES (?, ?)",
+                               (user_data["modify_id"], tag_rowid))
+
             conn.commit()
 
             update.message.reply_text("Yay! Tags updated successfully!")
