@@ -264,6 +264,11 @@ def main():
                        FOREIGN KEY(user_sticker_rowid) REFERENCES USER_STICKER(rowid),
                        FOREIGN KEY(tag_rowid) REFERENCES TAG(rowid))''')
 
+    # Create index
+    cursor.execute("CREATE INDEX IF NOT EXISTS index_user ON USER(id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS index_sticker ON STICKER(file_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS index_tag ON TAG(tag)")
+
     conn.commit()
 
     # Create the Updater and pass it your bot's token.
