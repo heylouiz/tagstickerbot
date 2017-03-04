@@ -71,7 +71,7 @@ def get_sticker(bot, update, user_data):  # pylint: disable=unused-argument
         user_data["modify_id"] = None
         update.message.reply_text("Cool, now send me words to tag your sticker.\n"
                                   "You can use more tags, just send them separated by commas (,)\n"
-                                  "<b>Warning:</b> Hashtags (#) are not allowed and will be"
+                                  "<b>Warning:</b> Hashtags (#) are not allowed and will be "
                                   "removed! Eg: #dank will be stored as dank\n"
                                   "<b>Example of tags:</b> dank, meme",
                                   parse_mode="HTML")
@@ -84,7 +84,7 @@ def confirm_update(bot, update, user_data):
     """
     if update.message.text == "Edit":
         update.message.reply_text("Cool, send me the new tags to your sticker\n"
-                                  "<b>Warning:</b> Hashtags (#) are not allowed and will be"
+                                  "<b>Warning:</b> Hashtags (#) are not allowed and will be "
                                   "removed! Eg: #dank will be stored as dank\n"
                                   "<b>Example of tags:</b> dank, meme",
                                   parse_mode="HTML",
