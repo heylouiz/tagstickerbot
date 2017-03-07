@@ -1,6 +1,6 @@
 # @tagstickerbot
 
-![build passing](https://travis-ci.org/heylouiz/tagstickerbot.svg?branch=master)
+[![Build Status](https://travis-ci.org/heylouiz/tagstickerbot.svg?branch=master)](https://travis-ci.org/heylouiz/tagstickerbot)
 
 A Telegram bot written in Python that tags stickers to help you find them when you "need".
 
