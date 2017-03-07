@@ -59,12 +59,23 @@ def get_sticker(bot, update, user_data):  # pylint: disable=unused-argument
                     user_data['sticker']['file_id']))
     query = cursor.fetchone()
     if query:
-        update.message.reply_text("You have already tagged this sticker, "
-                                  "want to edit the tags or remove it?",
+        user_sticker_rowid = query["rowid"]
+        cursor.execute("SELECT * "
+                       "FROM STICKER_TAG, TAG "
+                       "WHERE STICKER_TAG.user_sticker_rowid=? "
+                       "AND STICKER_TAG.tag_rowid = TAG.rowid",
+                       (user_sticker_rowid,))
+        tags = list()
+        for tag in cursor.fetchall():
+            tags.append(tag["tag"])
+        update.message.reply_text("You have already tagged this sticker with:\n"
+                                  "<b>{}</b>".format(", ".join(tags)) + "\n"
+                                  "Want to edit the tags or remove it?",
+                                  parse_mode="HTML",
                                   reply_markup=ReplyKeyboardMarkup([["Edit", "Cancel", "Remove"]],
                                                                    one_time_keyboard=True))
         user_data["modify"] = True
-        user_data["modify_id"] = query["rowid"] # This is the USER_STICKER.rowid
+        user_data["modify_id"] = user_sticker_rowid
         return CONFIRM_UPDATE
     else:
         user_data["modify"] = False
@@ -77,6 +88,35 @@ def get_sticker(bot, update, user_data):  # pylint: disable=unused-argument
                                   parse_mode="HTML")
         return TAGGING
 
+def list_tags(bot, update):  # pylint: disable=unused-argument
+    """ Handler for the command /list.
+        Returns all user tags
+    """
+    stickers = dict()
+    cursor = conn.cursor()
+    cursor.execute("SELECT USER_STICKER.rowid, * "
+                   "FROM USER_STICKER, USER, STICKER_TAG, TAG "
+                   "WHERE USER_STICKER.user_rowid = USER.rowid "
+                   "AND USER.id=? "
+                   "AND STICKER_TAG.user_sticker_rowid=USER_STICKER.rowid "
+                   "AND STICKER_TAG.tag_rowid = TAG.rowid",
+                   (str(update.message.from_user.id),))
+
+    for query in cursor.fetchall():
+        if query["user_sticker_rowid"] not in stickers:
+            stickers[query["user_sticker_rowid"]] = []
+        stickers[query["user_sticker_rowid"]].append(query["tag"])
+
+    if not stickers:
+        update.message.reply_text("Seems like you didn't tag any sticker...\n"
+                                  "Send me one sticker to tag.")
+    else:
+        msg = "You have the following tags:\n"
+        for num, sticker in enumerate(stickers):
+            msg += "{} - {}\n".format(num + 1, ", ".join(stickers[sticker]))
+        update.message.reply_text(msg, parse_mode="HTML")
+
+    return ConversationHandler.END
 
 def confirm_update(bot, update, user_data):
     """Handler for a message that begins with Edit, Cancel or Remove.
@@ -99,8 +139,8 @@ def tag_sticker(bot, update, user_data):  # pylint: disable=unused-argument
     """Handler for a text message with the user tags.
        Store tags in the user data.
     """
-    # Hashtags are not supported
-    user_data['tags'] = update.message.text.replace("#", "")
+    # Hashtags are not supported and all tags are stored in lower case
+    user_data['tags'] = update.message.text.replace("#", "").lower()
     update.message.reply_text("You wanna tag your sticker with the following words:\n"
                               "<b>{}</b>\n".format(user_data["tags"]) + "Is that right?",
                               parse_mode="HTML",
@@ -301,6 +341,7 @@ def main():
     # Add conversation handler
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start),
+                      CommandHandler("list", list_tags),
                       MessageHandler(Filters.sticker, get_sticker, pass_user_data=True)],
         states={
             STICKER: [MessageHandler(Filters.sticker, get_sticker, pass_user_data=True)],
